@@ -23,6 +23,12 @@
         <div id="sign_in_alternatives_container">
           <span id="google_sign_in_option">or you can <a  id="google_sign_in" onclick = "googleSignin()" class="login_link">sign in with Google </a></span>
         </div>
+        <br>
+        <br>
+        <br>
+    <div id = "sign_up_option">
+      <span id="signup">Don't have an account? <a  id="signup" href="{% url 'Signup' %}">Signup</a></span>
+
     <br>
     <br>
     <br>
@@ -48,11 +54,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
       var firebaseConfig = {
-      apiKey: "AIzaSyDr4jO2Gp7j0hsx5VLHDtdObBZp7XemTOs",
-      authDomain: "project-d4bf4.firebaseapp.com",
-      databaseURL: "https://project-d4bf4-default-rtdb.firebaseio.com",
-      storageBucket: "project-d4bf4.appspot.com",
-      measurementId: "G-7BENWP5SS7", };
+      apiKey: "AIzaSyCqa4-n6rAH4w16W7k0ZZBhW6nKqaOyYgU",
+      authDomain: "project-78015.firebaseapp.com",
+      databaseURL: "https://project-78015-default-rtdb.firebaseio.com",
+      storageBucket: "project-78015.appspot.com",
+      measurementId: "G-KSMCSSMRW4", };
       
       firebase.initializeApp(firebaseConfig);
       var provider = new firebase.auth.GoogleAuthProvider();
@@ -127,7 +133,5 @@
         error:function (xhr, textStatus, thrownError){}
         });
       }
-    </script>
-      
     </script>
 </body>
