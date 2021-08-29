@@ -2,7 +2,7 @@ from django.urls import path,include
 from . import views
 
 urlpatterns = [
-    path('', views.loginpage, name = "Homepage"),
+    path('', views.loginpage, name = "Loginpage"),
     path ('gsignin/', views.GoogleSignin, name = "Gsign"),
     path ('home', views.firebaseLoginAuth, name = "Dashboard"),  
     path ('Signup', views.signup, name = "Signup"),  

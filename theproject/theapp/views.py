@@ -20,11 +20,14 @@ firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 pyreauth = firebase.auth()
 pyrestorage = firebase.storage()
-
+ 
 # Create your views here.
 
 def loginpage(request):
-    return render(request, 'login/index.html')
+    msg = request.session.get('msg')
+    if not msg:
+        msg = ""
+    return render(request, 'login/index.html', {"msg": msg})
 
 def signup(request):
     return render(request, 'Registration/signup.html')
@@ -38,13 +41,15 @@ def postsignup(request):
         passw2 = request.POST['password2']
         
         if passw != passw2:
-            request.session['message'] = "Passwords didn't Match! Try again"
+            request.session['msg'] = "Passwords didn't Match! Try again"
             return signup(request)
         else:
             userobj = pyreauth.create_user_with_email_and_password(email, passw)
             sid = userobj['localId']
-            print(sid)
-            request.session['message'] = "Account Creation Success! Login now!"
+            print(sid)           
+            request.session['uid'] = sid
+            name = db.child(sid).update({"name":name})
+            request.session["msg"] = "Account Creation Success! Login now!"
             return loginpage(request)
 
 
@@ -66,8 +71,8 @@ def firebaseLoginAuth(request):
         #roles set and print
         return homepage(request, "successfully logged in")
         #except:
-            #message="invalid email or password"
-            #return render(request, 'login/index.html', {"msg": message})
+            #request.session["msg"]="invalid email or password"
+            #return loginpage(request)
     else: 
         return homepage(request, "")
 
