@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      {% if msg %}
+      <script> alert('{{ msg }}'); </script>
+      {% endif %}
+      {% csrf_token %}
+      {% load static %}
+    <meta charset="utf-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sly.css' %}">
+    <link rel="stylesheet" href="https:////cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+  </head>
+<body>
+
+  <div class="main overlay">
+
+   
+    <div class="sidebar">
+      <h1>Dashboard</h1>
+      <ul>
+        <li><a href="{% url 'Dashboard' %}"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="#"><i class="fa fa-unlock"></i>Files Shared with You</a></li>
+        <li><a href="#"><i class="fa fa-lock"></i>Your Shared Files</a></li>
+        <li><a href="{% url 'invite' %}"><i class="fa fa-upload"></i>Invite Collaborator</a></li> 
+        <li><a href="{% url 'logout' %}">Logout</a></li> 
+      </ul>
+    </div>
+    
+    <div class="page-wrapper">
+      <div class="container-fluid">
+          <div class="card">
+              <div class="card-body">
+                  <div class="row">
+                      <div class="col-6 mt-3">
+                          <!--Upload Picture Start-->
+                          <div class="col-12 mb-2">
+                            <div class="form-group row">
+                              <h1 class="font-weight-bold mb-2 custom_text_color">Hello {{nam}}</h1>
+                                <div class="col-12 mb-2">
+                                  <label for="files">
+                                    <input type="file" name="files[]" id="files" style="display:none;">
+                                    <input type="hidden" name="url" id="url">
+                                    <img height = "500" width = "500" src="{{avatar}}"/>
+                                  </label>                
+                                </div>
+                                <div class="col-3">  
+                                  <button type="button" onclick="uploadimage()"class="btn btn-primary">Upload</button>           
+                                </div>
+                            </div>        
+                          </div>
+                          <!--Upload Picture End-->         
+                      </div>
+
+                      <div class="col-6 mt-3">
+                          <h1 class="font-weight-bold custom_text_color">Total Files: {{count}}</h1>
+                          <div class="table-responsive-xl">
+                              <table id="config-table" class="table display table-bordered table-striped no-wrap">
+                                  <thead>
+                                  <tr>
+                                      <th>File Name</th> 
+                                      <th>Upload Time</th>
+                                      <th>Download Link</th> 
+                                  </tr>
+                                  </thead>
+                                  <tbody>
+                                    {% for x,y,z in zip%}
+                                  <tr>
+                                      <td>{{x}}</td>
+                                      <td>{{y}}</td>
+                                      <td>
+                                        <a class="btn btn-secondary" role="button" href="{{z}}" download>Download</a>
+                                        </td>
+                                  </tr>
+                                  {% endfor %}
+                                  </tbody> 
+                              </table>
+                          </div>                                
+                      </div>
+                      <form method = "POST" action = "{% url 'uploadfile' %}" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="col-12 mt-3">
+                        <h1 class="font-weight-bold custom_text_color">Document Upload</h1>
+                        <div class="form-group row">
+                            <div class="col-2">
+                              <input type='file' name = "drc" id = "drc" />              
+                            </div>
+                            <div class="col-3">
+                              <input class="input_text" name = "fname" type='text' placeholder="File Name"/> 
+                              <button type="submit"  class="btn btn-primary">Upload</button>                
+                            </div>
+                        </div> 
+                      </div>
+                    </form>
+                  </div>
+              </div>
+          </div> 
+      </div>
+    </div>
+  </div>
+
+
+ <!--scripts Start-->
+   <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+   <script src="app.js"></script>
+   <script>
+     var firebaseConfig = {
+     apiKey: "AIzaSyCqa4-n6rAH4w16W7k0ZZBhW6nKqaOyYgU",
+     authDomain: "project-78015.firebaseapp.com",
+     databaseURL: "https://project-78015-default-rtdb.firebaseio.com",
+     storageBucket: "project-78015.appspot.com",
+     measurementId: "G-KSMCSSMRW4", };
+     
+     firebase.initializeApp(firebaseConfig);
+     
+     /* WORKING UPLOAD FUNCTION FOR AVATAR, USE FOR OTHER UPLOADS CHANGING CHILD DIRECTORY */
+     
+     function uploadimage(){
+       var storage = firebase.storage();
+       var file=document.getElementById("files").files[0];
+       var storageref=storage.ref();
+       var x = "{{lid|safe}}";
+       var y = x.concat(".jpg");
+       console.log(y);
+       var thisref=storageref.child("avatar").child(y).put(file);
+       thisref.on('state_changed',function(snapshot) {
+       console.log('Done');
+       
+       }, function(error) {
+       console.log('Error',error);
+       
+     }, function() {
+       // Uploaded completed successfully, now we can get the download URL
+       thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+         console.log('File available at', downloadURL);
+         document.getElementById("url").value=downloadURL;
+         alert('uploaded successfully');
+       });
+     });
+     }
+   </script>
+   
+   <!-- This is data table -->
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+   <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+   <script>
+        $(function () {
+            $('#example23').DataTable({
+                dom: 'Bfrtip'
+            });
+
+            $('#config-table').DataTable({
+                responsive: true
+            });
+        });
+
+   </script>
+ <!--scripts End-->
+   
+   
+  
+</body>
+</html>

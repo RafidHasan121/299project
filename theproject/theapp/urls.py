@@ -7,4 +7,7 @@ urlpatterns = [
     path ('home', views.firebaseLoginAuth, name = "Dashboard"),  
     path ('Signup', views.signup, name = "Signup"),  
     path ('PostSignup', views.postsignup, name  = "Postsignup"),
+    path ('Upload', views.uploadfile, name  = "uploadfile"),
+    path ('logout', views.logout, name = "logout"),
+    path ('collab', views.invite, name = "invite"),
     ]

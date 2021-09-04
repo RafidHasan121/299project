@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib import auth,messages
 import pyrebase
 import datetime
+import os
 
 #pyrebase sdk
 config = {
@@ -48,7 +49,12 @@ def postsignup(request):
             sid = userobj['localId']
             print(sid)           
             request.session['uid'] = sid
-            name = db.child(sid).update({"name":name})
+            data = {"name" : name,
+                "filecount": 0,
+            }
+            x = "avatar/" + sid + ".jpg" 
+            pyrestorage.child(x).put("theapp/static/image.jpg")
+            db.child(sid).set(data)
             request.session["msg"] = "Account Creation Success! Login now!"
             return loginpage(request)
 
@@ -87,10 +93,74 @@ def GoogleSignin(request):
 #Returns homepage
 def homepage(request, message):
     userobj = request.session.get('uid')
-    name = db.child("user").child(userobj).child("name").child("name").get()
-    print(name.val())
-    avpath = "avatar/"+ userobj +".jpg" 
-    avpath = pyrestorage.child(avpath).get_url(None)
-    print(userobj)
-    #print(avpath)
-    return render(request, 'dashboard/sidebar.html', {"msg": message ,"lid": userobj,"dp": avpath,"nam": name.val()})
+    x = db.child(userobj).child("name").get()
+    name = x.val()
+    #print(name)
+    x = db.child(userobj).child("filecount").get()
+    filecount = x.val()
+    #print(filecount)
+    x = "avatar/"+ userobj +".jpg"
+    avatar = pyrestorage.child(x).get_url(None)
+    #print(avatar)
+    myfiles = ownfiles(userobj)
+    return render(request, 'Dashboard/sidebar.html', {"msg": message, "nam" : name, "count" : filecount, "avatar" : avatar, "lid" : userobj, "zip": myfiles})
+
+def uploadfile(request):
+   filename = request.POST['fname']
+   filelink = request.FILES['drc'] 
+   extension =os.path.splitext(filelink.name)
+   userobj = request.session.get('uid')
+   x = userobj + "/" + filename + extension[1]  
+   pyrestorage.child(x).put(filelink)
+   c = str(datetime.datetime.now())
+   y = (pyrestorage.child(x).get_url(userobj))
+   z = {"name" : (filename + extension[1]),
+   "created" : c,
+   "creator": userobj,
+   "url": y,
+   "Access": {
+   userobj : True}}
+   db.child("files").push(z)
+   count = db.child(userobj).get()
+   for pieces in count.each():
+       if (pieces.key() == "filecount"):
+           count = pieces.val()
+           break
+   count = count+1
+   db.child(userobj).update({"filecount" : count})
+   return homepage(request, "File Successfully Uploaded!")
+
+#Self Files zipped
+def ownfiles(userobj):
+   Filename = []
+   Uploadtime = []
+   url = []
+   x = db.child("files").get()
+   for user in x.each():
+       y = db.child("files").child(user.key()).get()
+       for creator in y.each():
+           if (creator.key()== "creator"):
+               z = creator.val()
+           else: z = 0
+           if userobj == z:
+               for og in y.each():
+                   if og.key() == "created":
+                       Uploadtime.append(og.val())
+                   if og.key() == "name":
+                       Filename.append(og.val())
+                   if og.key() == "url":
+                       url.append(og.val())
+   print(Filename)
+   print(Uploadtime)
+   print(url)
+   zipped = zip (Filename, Uploadtime, url)
+   return zipped
+
+def logout(request):
+    auth.logout(request)
+    return loginpage(request)
+                   
+def invite(request):
+    return render(request, 'Invite/Collab.html')
+
+
